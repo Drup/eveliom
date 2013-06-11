@@ -1,7 +1,7 @@
 OASISFormat: 0.3
 Name:        Eveliom
 Version:     0.1
-Synopsis:    An eve library for eliom.
+Synopsis:    An Eliom library for Eve Online
 Authors:     Gabriel Radanne
 License:     WTFPL
 Plugins:     DevFiles (0.3), META (0.3)
