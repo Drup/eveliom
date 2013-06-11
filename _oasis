@@ -11,13 +11,14 @@ Library "eveliom.server"
   Path:				src/server
   BuildTools:		ocamlbuild
   Modules:			Eveliom
-  BuildDepends:		eliom.server , ocsigenserver, threads
+  BuildDepends:		eliom.server, threads
   
 Library "eveliom.client"
   Install:			true
   Path:				src/client
   BuildTools:		ocamlbuild
   Modules:			Ccpeve
+  CompiledObject: 	byte
   BuildDepends:		js_of_ocaml
 
 Document doc
