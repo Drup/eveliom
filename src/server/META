@@ -1,0 +1,22 @@
+# OASIS_START
+# DO NOT EDIT (digest: f449b33dd98bb3b4db078e160a71502c)
+package "server" (
+ version = "0.1"
+ description = "An Eliom library for Eve Online"
+ requires = "lwt.syntax eliom.server threads"
+ archive(byte) = "eveliom.server.cma"
+ archive(byte, plugin) = "eveliom.server.cma"
+ archive(native) = "eveliom.server.cmxa"
+ archive(native, plugin) = "eveliom.server.cmxs"
+ exists_if = "eveliom.server.cma"
+)
+package "client" (
+ version = "0.1"
+ description = "An Eliom library for Eve Online"
+ requires = "lwt.syntax js_of_ocaml"
+ archive(byte) = "eveliom.client.cma"
+ archive(byte, plugin) = "eveliom.client.cma"
+ exists_if = "eveliom.client.cma"
+)
+# OASIS_STOP
+

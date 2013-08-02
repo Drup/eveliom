@@ -7,25 +7,25 @@ License:     WTFPL
 Plugins:     DevFiles (0.3), META (0.3)
 
 Library "eveliom.server"
-  Install:			true
-  Path:				src/server
+  Install:		true
+  Path:			src/server
   BuildTools:		ocamlbuild
-  Modules:			Eveliom
-  BuildDepends:		eliom.server, threads
-  
+  Modules:		Eveliom, Eveapi
+  BuildDepends:		lwt.syntax, eliom.server, threads
+
 Library "eveliom.client"
-  Install:			true
-  Path:				src/client
+  Install:		true
+  Path:			src/client
   BuildTools:		ocamlbuild
-  Modules:			Ccpeve
+  Modules:		Ccpeve
   CompiledObject: 	byte
-  BuildDepends:		js_of_ocaml
+  BuildDepends:		lwt.syntax, js_of_ocaml
 
 Document doc
-  Install:			true
+  Install:		true
   InstallDir:		$htmldir/doc
-  Title:			API reference for Eveliom
-  Type:				ocamlbuild (0.3)
+  Title:		API reference for Eveliom
+  Type:			ocamlbuild (0.3)
   BuildTools:		ocamldoc, ocamlbuild
   XOCamlbuildPath:	src
   XOCamlbuildLibraries:	eveliom.server, eveliom.client
