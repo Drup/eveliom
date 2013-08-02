@@ -1,0 +1,9 @@
+S src/client
+S src/server
+
+B _build/src/client
+B _build/src/server
+
+PKG eliom.server
+PKG js_of_ocaml
+PKG tyxml
