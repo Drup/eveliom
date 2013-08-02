@@ -10,6 +10,7 @@ Library "eveliom.server"
   Install:		true
   Path:			src/server
   BuildTools:		ocamlbuild
+  InternalModules:	Clist
   Modules:		Eveliom, Eveapi
   BuildDepends:		lwt.syntax, eliom.server, threads
 
