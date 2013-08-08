@@ -11,14 +11,14 @@ Library "eveliom.header"
   Path:			src/header
   BuildTools:		ocamlbuild
   InternalModules:	Clist
-  Modules:		Eveliom
+  Modules:		Eve_header
   BuildDepends:		lwt.syntax, eliom.server, threads
 
 Library "eveliom.igb"
   Install:		true
   Path:			src/igb
   BuildTools:		ocamlbuild
-  Modules:		Ccpeve
+  Modules:		Eve_igb
   CompiledObject: 	byte
   BuildDepends:		lwt.syntax, js_of_ocaml
 
@@ -27,7 +27,7 @@ Library "eveliom.api"
   Path:			src/api
   BuildTools:		ocamlbuild
   InternalModules:	Apicall, Apidsl, endpoint/Account, endpoint/Character, endpoint/Corporation, endpoint/Evemap, endpoint/Eve
-  Modules:		Eveapi
+  Modules:		Eve_api
   BuildDepends:		lwt.syntax, eliom.server, threads
 
 Document doc
