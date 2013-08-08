@@ -7,19 +7,14 @@ module Response = struct
 
   exception Wrong of string
 
-  type _ extract =
-    | Tags : (string * string) list extract
-    | Rowset : (string * string) list list extract
-    | Rowsets : (string * string) list list list extract
-    | Rowset2 : (string * string) list list list extract
-    | Raw : Simplexmlparser.xml list extract
-
   type 'a t = {
     version : string ;
     currentTime : string ;
     cachedUntil : string ;
     data : 'a
   }
+
+  type 'a extract = Simplexmlparser.xml list -> 'a t
 
   let map f
       { version ; currentTime ; cachedUntil ; data } =
@@ -45,37 +40,30 @@ module Response = struct
 
   let parse_tags = List.map parse_tag
 
-  let unwrap = function
+  let extract = function
     | [Element ("eveapi", [("version", version)],
          [ Element ("currentTime", [], [PCData currentTime]) ;
            Element ("result", [], data) ;
            Element ("cachedUntil", [], [PCData cachedUntil])
          ])]
       -> { version ; currentTime ; cachedUntil ; data }
-    | _ -> raise (Wrong "unwrap")
+    | _ -> raise (Wrong "extract")
 
-  let extract_tags r = map parse_tags (unwrap r)
+  let extract_tags r = map parse_tags (extract r)
 
   let extract_rowset r  =
     let f = function
       | [ l ] -> parse_rowset l
       | _ -> raise (Wrong "rowset")
-    in map f (unwrap r)
+    in map f (extract r)
 
-  let extract_rowsets r = map (List.map parse_rowset) (unwrap r)
+  let extract_rowsets r = map (List.map parse_rowset) (extract r)
 
   let extract_rowset2 r  =
     let f = function
       | [ l ] -> parse_rowset2 l
       | _ -> raise (Wrong "rowset2")
-    in map f (unwrap r)
-
-  let extract (type a) (ex : a extract) xml : a t = match ex with
-    | Tags -> extract_tags xml
-    | Rowset -> extract_rowset xml
-    | Rowset2 -> extract_rowset2 xml
-    | Rowsets -> extract_rowsets xml
-    | Raw -> unwrap xml
+    in map f (extract r)
 
 end
 
@@ -152,7 +140,7 @@ let get_uri (Api x) = x.uri
 let apply_api prefix (Api endpoint) =
   let cont args =
     lwt response = http_fetch prefix endpoint.uri args in
-    let data = Response.( (extract endpoint.result response).data ) in
+    let data = Response.( (endpoint.result response).data ) in
     Lwt.return (endpoint.decode data)
   in
   Clist.(glue list_mono cont (append endpoint.auth endpoint.param))
@@ -167,7 +155,7 @@ let accountStatus =
     cache = Short ;
     auth = Clist.singfun encode_apikey ;
     param = Clist.Nil ;
-    result = Response.Tags;
+    result = Response.extract_tags;
     decode = fun i -> i ;
   }
 let get_accountStatus = apply_api tq accountStatus
@@ -178,7 +166,7 @@ let apiKeyInfo =
     cache = Short ;
     auth = Clist.singfun encode_apikey ;
     param = Clist.Nil ;
-    result = Response.Rowset;
+    result = Response.extract_rowset;
     decode = fun i -> i ;
   }
 let get_apiKeyInfo = apply_api tq apiKeyInfo
@@ -200,7 +188,7 @@ let characters =
     cache = Short ;
     auth = Clist.singfun encode_apikey ;
     param = Clist.Nil ;
-    result = Response.Rowset ;
+    result = Response.extract_rowset ;
     decode = List.map dec ;
   }
 let get_characters = apply_api tq characters
@@ -213,7 +201,7 @@ let accountBalance =
     cache = Short ;
     auth = Clist.singfun encode_charkey ;
     param = Clist.Nil ;
-    result = Response.Rowset ;
+    result = Response.extract_rowset ;
     decode = fun i -> i ;
   }
 let get_accountBalance = apply_api tq accountBalance
@@ -224,7 +212,7 @@ let assetList =
     cache = Long ;
     auth = Clist.singfun encode_charkey ;
     param = Clist.Nil ;
-    result = Response.Rowset2 ;
+    result = Response.extract_rowset2 ;
     decode = fun i -> i ;
   }
 let get_assetList = apply_api tq assetList
@@ -237,7 +225,7 @@ let calendarEventAttendees =
     cache = MShort ;
     auth = Clist.singfun encode_charkey ;
     param = Clist.singfun (fun x -> [ "eventIDs", soi x ]) ;
-    result = Response.Rowset ;
+    result = Response.extract_rowset ;
     decode = fun i -> i ;
   }
 let get_calendarEventAttendees = apply_api tq calendarEventAttendees
@@ -249,7 +237,7 @@ let characterSheet =
     cache = MShort ;
     auth = Clist.singfun encode_charkey ;
     param = Clist.Nil ;
-    result = Response.Raw ;
+    result = Response.extract ;
     decode = fun i -> i ;
   }
 let get_characterSheet = apply_api tq characterSheet
@@ -264,7 +252,7 @@ let walletJournal =
     cache = MShort ;
     auth = Clist.singfun encode_charkey ;
     param = Clist.(Param enc_fromID @+ Param enc_rowCount @+ Nil) ;
-    result = Response.Rowset ;
+    result = Response.extract_rowset ;
     decode = fun i -> i ;
   }
 let get_walletJournal ?fromID ?rowCount ~key =
@@ -280,7 +268,7 @@ let walletTransactions =
     cache = MShort ;
     auth = Clist.singfun encode_charkey ;
     param = Clist.(Param enc_fromID @+ Param enc_rowCount @+ Nil) ;
-    result = Response.Rowset ;
+    result = Response.extract_rowset ;
     decode = fun i -> i ;
   }
 let get_walletTransactions ?fromID ?rowCount ~key =
@@ -297,7 +285,7 @@ let characterInfo =
     cache = Short ;
     auth = Clist.Nil ;
     param = Clist.singfun enc ;
-    result = Response.Tags ;
+    result = Response.extract_tags ;
     decode = fun i -> i ;
   }
 let get_characterInfo = apply_api tq characterInfo
