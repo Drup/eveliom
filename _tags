@@ -1,7 +1,7 @@
 # OASIS_START
-# DO NOT EDIT (digest: b10db210275197cc590379ec98cf7ad3)
-# Ignore VCS directories, you can use the same kind of rule outside 
-# OASIS_START/STOP if you want to exclude directories that contains 
+# DO NOT EDIT (digest: cb70bd909e40ffb36d5ed5abc64c8cd9)
+# Ignore VCS directories, you can use the same kind of rule outside
+# OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
 <**/.svn>: -traverse
 <**/.svn>: not_hygienic
@@ -13,15 +13,23 @@
 ".git": not_hygienic
 "_darcs": -traverse
 "_darcs": not_hygienic
-# Library eveliom.server
-"src/server/eveliom.server.cmxs": use_eveliom.server
-<src/server/*.ml{,i}>: pkg_lwt.syntax
-<src/server/*.ml{,i}>: pkg_eliom.server
-<src/server/*.ml{,i}>: pkg_threads
-# Library eveliom.client
-"src/client/eveliom.client.cmxs": use_eveliom.client
-<src/client/*.ml{,i}>: pkg_lwt.syntax
-<src/client/*.ml{,i}>: pkg_js_of_ocaml
+# Library eveliom.header
+"src/header/eveliom.header.cmxs": use_eveliom.header
+<src/header/*.ml{,i}>: pkg_lwt.syntax
+<src/header/*.ml{,i}>: pkg_eliom.server
+<src/header/*.ml{,i}>: pkg_threads
+# Library eveliom.igb
+"src/igb/eveliom.igb.cmxs": use_eveliom.igb
+<src/igb/*.ml{,i}>: pkg_lwt.syntax
+<src/igb/*.ml{,i}>: pkg_js_of_ocaml
+# Library eveliom.api
+"src/api/eveliom.api.cmxs": use_eveliom.api
+<src/api/*.ml{,i}>: pkg_lwt.syntax
+<src/api/*.ml{,i}>: pkg_eliom.server
+<src/api/*.ml{,i}>: pkg_threads
+<src/api/endpoint/*.ml{,i}>: pkg_lwt.syntax
+<src/api/endpoint/*.ml{,i}>: pkg_eliom.server
+<src/api/endpoint/*.ml{,i}>: pkg_threads
 # OASIS_STOP
 
-true: syntax_camlp4o
+true: syntax_camlp4o, pkg_lwt.syntax

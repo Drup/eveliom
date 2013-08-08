@@ -1,0 +1,32 @@
+# OASIS_START
+# DO NOT EDIT (digest: d68bdb3348a1b7cfe82593035acd36df)
+package "igb" (
+ version = "0.1"
+ description = "An Eliom library for Eve Online"
+ requires = "lwt.syntax js_of_ocaml"
+ archive(byte) = "eveliom.igb.cma"
+ archive(byte, plugin) = "eveliom.igb.cma"
+ exists_if = "eveliom.igb.cma"
+)
+package "header" (
+ version = "0.1"
+ description = "An Eliom library for Eve Online"
+ requires = "lwt.syntax eliom.server threads"
+ archive(byte) = "eveliom.header.cma"
+ archive(byte, plugin) = "eveliom.header.cma"
+ archive(native) = "eveliom.header.cmxa"
+ archive(native, plugin) = "eveliom.header.cmxs"
+ exists_if = "eveliom.header.cma"
+)
+package "api" (
+ version = "0.1"
+ description = "An Eliom library for Eve Online"
+ requires = "lwt.syntax eliom.server threads"
+ archive(byte) = "eveliom.api.cma"
+ archive(byte, plugin) = "eveliom.api.cma"
+ archive(native) = "eveliom.api.cmxa"
+ archive(native, plugin) = "eveliom.api.cmxs"
+ exists_if = "eveliom.api.cma"
+)
+# OASIS_STOP
+

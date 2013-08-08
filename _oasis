@@ -6,21 +6,29 @@ Authors:     Gabriel Radanne
 License:     WTFPL
 Plugins:     DevFiles (0.3), META (0.3)
 
-Library "eveliom.server"
+Library "eveliom.header"
   Install:		true
-  Path:			src/server
+  Path:			src/header
   BuildTools:		ocamlbuild
   InternalModules:	Clist
-  Modules:		Eveliom, Eveapi
+  Modules:		Eveliom
   BuildDepends:		lwt.syntax, eliom.server, threads
 
-Library "eveliom.client"
+Library "eveliom.igb"
   Install:		true
-  Path:			src/client
+  Path:			src/igb
   BuildTools:		ocamlbuild
   Modules:		Ccpeve
   CompiledObject: 	byte
   BuildDepends:		lwt.syntax, js_of_ocaml
+
+Library "eveliom.api"
+  Install:		true
+  Path:			src/api
+  BuildTools:		ocamlbuild
+  InternalModules:	Apicall, Apidsl, endpoint/Account, endpoint/Character, endpoint/Corporation, endpoint/Evemap, endpoint/Eve
+  Modules:		Eveapi
+  BuildDepends:		lwt.syntax, eliom.server, threads
 
 Document doc
   Install:		true
@@ -29,4 +37,4 @@ Document doc
   Type:			ocamlbuild (0.3)
   BuildTools:		ocamldoc, ocamlbuild
   XOCamlbuildPath:	src
-  XOCamlbuildLibraries:	eveliom.server, eveliom.client
+  XOCamlbuildLibraries:	eveliom.igb, eveliom.header, eveliom.api

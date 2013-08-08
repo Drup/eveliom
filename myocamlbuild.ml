@@ -1,5 +1,5 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: 25d560eabdab7651228def08ac42802e) *)
+(* DO NOT EDIT (digest: 56b77ca9ac6dcc4e54e3820ed486de9d) *)
 module OASISGettext = struct
 (* # 21 "src/oasis/OASISGettext.ml" *)
 
@@ -479,17 +479,19 @@ let package_default =
   {
      MyOCamlbuildBase.lib_ocaml =
        [
-          ("eveliom.server", ["src/server"]);
-          ("eveliom.client", ["src/client"])
+          ("eveliom.header", ["src/header"]);
+          ("eveliom.igb", ["src/igb"]);
+          ("eveliom.api", ["src/api"])
        ];
      lib_c = [];
      flags = [];
-     includes = [];
+     includes =
+       [("src/api/endpoint", ["src/api"]); ("src/api", ["src/api/endpoint"])];
      }
   ;;
 
 let dispatch_default = MyOCamlbuildBase.dispatch_default package_default;;
 
-# 494 "myocamlbuild.ml"
+# 496 "myocamlbuild.ml"
 (* OASIS_STOP *)
 Ocamlbuild_plugin.dispatch dispatch_default;;
