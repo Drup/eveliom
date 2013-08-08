@@ -122,54 +122,77 @@ let apikey ~keyId ~vCode ~charId : charkey =
 let encode_charkey (k : charkey) =
   ("characterID", string_of_int (k#characterID)) :: encode_apikey (k :> apikey)
 
+let no_param () = []
+let no_decode id = id
+let ( ** ) f g (x,y) = f x @ g y
+let (!?) f = function Some x -> f x | None -> []
+
+type ('t1, 't2) call_conv =
+  | Nothing    : (unit -> unit -> 'a , unit -> 'a) call_conv
+  | Auth       : ('a -> unit -> 'b , 'a -> 'b) call_conv
+  | Param      : (unit -> 'a -> 'b , 'a -> 'b) call_conv
+  | Param2     : (unit -> ('a * 'b) -> 'c, 'a -> 'b -> 'c) call_conv
+  | AuthParam  : ('a -> 'b -> 'c, 'a -> 'b -> 'c) call_conv
+  | AuthParam2 : ('a -> ('b * 'c) -> 'd, 'a -> 'b -> 'c -> 'd) call_conv
+
+let adapt_call (type t) (type t') (c : (t,t') call_conv) (f : t) : t' =
+  match c with
+    | Nothing -> fun () -> f () ()
+    | Auth -> fun x -> f x ()
+    | Param -> fun x -> f () x
+    | Param2 -> fun x y -> f () (x,y)
+    | AuthParam -> fun x y -> f x y
+    | AuthParam2 -> fun x y z -> f x (y,z)
+
 type enc_param = (string * string) list
 
-type ('extract, 'a , 'b, 'c) internal_api = {
-  uri : string ;
+type ('extract, 'auth , 'param, 'out) internal_api = {
   cache : cache ;
   result : 'extract Response.extract ;
-  auth : (enc_param, 'b, 'c) Clist.t ;
-  param : (enc_param, 'a Lwt.t, 'b) Clist.t ;
-  decode : 'extract -> 'a
+  auth : 'auth -> enc_param ;
+  param : 'param -> enc_param ;
+  decode : 'extract -> 'out ;
+  uri : string ;
 }
-type _ api = Api : (_, _, _, 'a) internal_api -> 'a api
 
-let get_cache (Api x) = x.cache
-let get_uri (Api x) = x.uri
-
-let apply_api prefix (Api endpoint) =
+let apply_api prefix endpoint =
   let cont args =
     lwt response = http_fetch prefix endpoint.uri args in
     let data = Response.( (endpoint.result response).data ) in
     Lwt.return (endpoint.decode data)
   in
-  Clist.(glue list_mono cont (append endpoint.auth endpoint.param))
+  let f auth param =
+    cont (endpoint.auth auth @ endpoint.param param)
+  in f
+
+let apply_api_call call prefix endpoint =
+  adapt_call call (apply_api prefix endpoint)
 
 (** {2 Spectific APIs} *)
 
 (** {5 Account} *)
 
 let accountStatus =
-  Api {
+  {
     uri = "/account/AccountStatus.xml.aspx" ;
     cache = Short ;
-    auth = Clist.singfun encode_apikey ;
-    param = Clist.Nil ;
+    auth = encode_apikey ;
+    param = no_param ;
     result = Response.extract_tags;
-    decode = fun i -> i ;
+    decode = no_decode ;
   }
-let get_accountStatus = apply_api tq accountStatus
+let get_accountStatus = apply_api_call Auth tq accountStatus
 
 let apiKeyInfo =
-  Api {
+  {
     uri = "/account/APIKeyInfo.xml.aspx" ;
     cache = Short ;
-    auth = Clist.singfun encode_apikey ;
-    param = Clist.Nil ;
+    auth = encode_apikey ;
+    param = no_param ;
     result = Response.extract_rowset;
     decode = fun i -> i ;
   }
-let get_apiKeyInfo = apply_api tq apiKeyInfo
+let get_apiKeyInfo = apply_api_call Auth tq apiKeyInfo
 
 let characters =
   let dec x = match x with
@@ -183,48 +206,48 @@ let characters =
         end
     | _ -> raise (Response.Wrong "characters")
   in
-  Api {
+  {
     uri = "/account/Characters.xml.aspx" ;
     cache = Short ;
-    auth = Clist.singfun encode_apikey ;
-    param = Clist.Nil ;
+    auth = encode_apikey ;
+    param = no_param ;
     result = Response.extract_rowset ;
     decode = List.map dec ;
   }
-let get_characters = apply_api tq characters
+let get_characters = apply_api_call Auth tq characters
 
 (** {5 Character } *)
 
 let accountBalance =
-  Api {
+  {
     uri = "/char/AccountBalance.xml.aspx" ;
     cache = Short ;
-    auth = Clist.singfun encode_charkey ;
-    param = Clist.Nil ;
+    auth = encode_charkey ;
+    param = no_param ;
     result = Response.extract_rowset ;
     decode = fun i -> i ;
   }
-let get_accountBalance = apply_api tq accountBalance
+let get_accountBalance = apply_api_call Auth tq accountBalance
 
 let assetList =
-  Api {
+  {
     uri = "/char/AssetList.xml.aspx" ;
     cache = Long ;
-    auth = Clist.singfun encode_charkey ;
-    param = Clist.Nil ;
+    auth = encode_charkey ;
+    param = no_param ;
     result = Response.extract_rowset2 ;
     decode = fun i -> i ;
   }
-let get_assetList = apply_api tq assetList
+let get_assetList = apply_api_call Auth tq assetList
 
 (* http://wiki.eve-id.net/APIv2_Char_CalendarEventAttendees_XML *)
 (* TODO multiple event virgule separated *)
 let calendarEventAttendees =
-  Api {
+  {
     uri = "/char/CalendarEventAttendees.xml.aspx" ;
     cache = MShort ;
-    auth = Clist.singfun encode_charkey ;
-    param = Clist.singfun (fun x -> [ "eventIDs", soi x ]) ;
+    auth = encode_charkey ;
+    param = (fun x -> [ "eventIDs", soi x ]) ;
     result = Response.extract_rowset ;
     decode = fun i -> i ;
   }
@@ -232,47 +255,47 @@ let get_calendarEventAttendees = apply_api tq calendarEventAttendees
 
 (* http://wiki.eve-id.net/APIv2_Char_CharacterSheet_XML *)
 let characterSheet =
-  Api {
+  {
     uri = "/char/CharacterSheet.xml.aspx" ;
     cache = MShort ;
-    auth = Clist.singfun encode_charkey ;
-    param = Clist.Nil ;
+    auth = encode_charkey ;
+    param = no_param ;
     result = Response.extract ;
     decode = fun i -> i ;
   }
-let get_characterSheet = apply_api tq characterSheet
+let get_characterSheet = apply_api_call Auth tq characterSheet
 
 (* http://wiki.eve-id.net/APIv2_Char_JournalEntries_XML *)
 let walletJournal =
   let enc_fromID = function | Some i -> [ "fromID", soi i ] | None -> []
   and enc_rowCount = function | Some i -> [ "rowCount", soi i ] | None -> []
   in
-  Api {
+  {
     uri = "/char/WalletJournal.xml.aspx" ;
     cache = MShort ;
-    auth = Clist.singfun encode_charkey ;
-    param = Clist.(Param enc_fromID @+ Param enc_rowCount @+ Nil) ;
+    auth = encode_charkey ;
+    param = enc_fromID ** enc_rowCount ;
     result = Response.extract_rowset ;
     decode = fun i -> i ;
   }
 let get_walletJournal ?fromID ?rowCount ~key =
-  apply_api tq walletJournal key fromID rowCount
+  apply_api tq walletJournal key (fromID,rowCount)
 
 (* http://wiki.eve-id.net/APIv2_Char_MarketTransactions_XML *)
 let walletTransactions =
   let enc_fromID = function | Some i -> [ "fromID", soi i ] | None -> []
   and enc_rowCount = function | Some i -> [ "rowCount", soi i ] | None -> []
   in
-  Api {
+  {
     uri = "/char/WalletTransactions.xml.aspx" ;
     cache = MShort ;
-    auth = Clist.singfun encode_charkey ;
-    param = Clist.(Param enc_fromID @+ Param enc_rowCount @+ Nil) ;
+    auth = encode_charkey ;
+    param = enc_fromID ** enc_rowCount ;
     result = Response.extract_rowset ;
     decode = fun i -> i ;
   }
 let get_walletTransactions ?fromID ?rowCount ~key =
-  apply_api tq walletTransactions key fromID rowCount
+  apply_api tq walletTransactions key (fromID,rowCount)
 
 (** {5 Corporation } *)
 
@@ -280,15 +303,15 @@ let get_walletTransactions ?fromID ?rowCount ~key =
 
 let characterInfo =
   let enc cID = [ ("characterID", cID) ] in
-  Api {
+  {
     uri = "/eve/CharacterInfo.xml.aspx" ;
     cache = Short ;
-    auth = Clist.Nil ;
-    param = Clist.singfun enc ;
+    auth = no_param ;
+    param = enc ;
     result = Response.extract_tags ;
     decode = fun i -> i ;
   }
-let get_characterInfo = apply_api tq characterInfo
+let get_characterInfo = apply_api_call Param tq characterInfo
 
 
 (** {5 Map } *)
