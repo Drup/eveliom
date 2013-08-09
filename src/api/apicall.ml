@@ -124,8 +124,8 @@ type ('extract, 'auth , 'param, 'out) api = {
 let apply_api prefix endpoint =
   let cont args =
     lwt response = http_fetch prefix endpoint.uri args in
-    let data = Response.( (endpoint.result response).data ) in
-    Lwt.return (endpoint.decode data)
+    let data = Response.map endpoint.decode (endpoint.result response) in
+    Lwt.return data
   in
   let f auth param =
     cont (endpoint.auth auth @ endpoint.param param)
