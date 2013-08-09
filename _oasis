@@ -26,7 +26,11 @@ Library "eveliom.api"
   Install:		true
   Path:			src/api
   BuildTools:		ocamlbuild
-  InternalModules:	Apicall, Apidsl, endpoint/Account, endpoint/Character, endpoint/Corporation, endpoint/Evemap, endpoint/Eve
+  InternalModules:
+    Apitype, Apicall, Apidsl,
+    endpoint/Account, endpoint/Character, endpoint/Corporation, endpoint/Evemap, endpoint/Eve,
+    endpoint/Wallet
+
   Modules:		Eve_api
   BuildDepends:		lwt.syntax, eliom.server, threads
 

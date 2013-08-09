@@ -1,4 +1,5 @@
 include Apicall
+include Apitype
 
 (** Convenience stuff *)
 
@@ -8,7 +9,9 @@ let soi = string_of_int
 let fos = float_of_string
 let sof = string_of_float
 
-let s2date x = x
+let s2date x : date = x
+
+let entity ~name ~id = { name ; id = ios id }
 
 let sopt f = function "" -> None | s -> Some (f s)
 let sopti = function "" -> 0 | s -> ios s

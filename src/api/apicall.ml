@@ -1,6 +1,3 @@
-
-module SMap = Map.Make(String)
-
 module Response = struct
 
   open Simplexmlparser
@@ -19,6 +16,8 @@ module Response = struct
   let map f
       { version ; currentTime ; cachedUntil ; data } =
     { version ; currentTime ; cachedUntil ; data = f data }
+
+  let with_data r d = map (fun _ -> d) r
 
   let parse_row = function
     | Element ("row", l , []) -> l

@@ -1,8 +1,5 @@
 open Apidsl
 
-type entity = { name : string ; id : int }
-let entity ~name ~id = { name ; id = ios id }
-
 let accountBalance =
   {
     uri = "/char/AccountBalance.xml.aspx" ;
@@ -64,19 +61,19 @@ let walletJournal =
         let owner1 = entity ownerName1 ownerID1 in
         let owner2 = entity ownerName2 ownerID2 in
         let arg = entity argName1 argID1 in
-        object
-          method date = s2date date
-          method refID = ios refID
-          method refTypeID = ios refTypeID
-          method owner1 = owner1
-          method owner2 = owner2
-          method argument = arg
-          method amount = fos amount
-          method balance = fos balance
-          method reason = reason
-          method taxReceiverID = sopti taxReceiverID
-          method taxAmount = soptf taxAmount
-        end
+        {
+           date = s2date date ;
+           refID = ios refID ;
+           refTypeID = ios refTypeID ;
+           owner1 = owner1 ;
+           owner2 = owner2 ;
+           argument = arg ;
+           amount = fos amount ;
+           balance = fos balance ;
+           reason = reason ;
+           taxReceiverID = sopti taxReceiverID ;
+           taxAmount = soptf taxAmount ;
+        }
     | _ -> raise (Response.Wrong "walletJournal")
   in
   {

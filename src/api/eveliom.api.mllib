@@ -1,6 +1,7 @@
 # OASIS_START
-# DO NOT EDIT (digest: 69818704d0ae7474293aa8da07fe4360)
+# DO NOT EDIT (digest: cbbb5e5c92937c120d331c8dcc55a502)
 Eve_api
+Apitype
 Apicall
 Apidsl
 endpoint/Account
@@ -8,4 +9,5 @@ endpoint/Character
 endpoint/Corporation
 endpoint/Evemap
 endpoint/Eve
+endpoint/Wallet
 # OASIS_STOP
