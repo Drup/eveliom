@@ -1,8 +1,12 @@
-S src/client
-S src/server
+S src/api
+S src/api/endpoint
+S src/header
+S src/igb
 
-B _build/src/client
-B _build/src/server
+B _build/src/api
+B _build/src/api/endpoint
+B _build/src/header
+B _build/src/igb
 
 PKG eliom.server
 PKG js_of_ocaml
