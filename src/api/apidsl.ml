@@ -8,6 +8,12 @@ let soi = string_of_int
 let fos = float_of_string
 let sof = string_of_float
 
+let s2date x = x
+
+let sopt f = function "" -> None | s -> Some (f s)
+let sopti = function "" -> 0 | s -> ios s
+let soptf = function "" -> 0. | s -> fos s
+
 (** DSL stuff *)
 
 let apikey (k : apikey) =
