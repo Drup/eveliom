@@ -102,7 +102,7 @@ let apikey ~keyId ~vCode : apikey =
   end
 
 type charkey = < keyId : int ; vCode : string ; characterID : int >
-let apikey ~keyId ~vCode ~charId : charkey =
+let charkey ~keyId ~vCode ~charId : charkey =
   object
     method keyId = keyId
     method vCode = vCode
