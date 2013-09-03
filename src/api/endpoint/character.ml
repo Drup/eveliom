@@ -47,6 +47,33 @@ let characterSheet =
   }
 let get_characterSheet = apply_api_call Auth tq characterSheet
 
+(* http://wiki.eve-id.net/APIv2_Char_ContactList_XML *)
+let contactList =
+  let decode_contact = function
+    | [ "contactID", id ; "contactName", name ;
+        "inWatchList", watched; "standing", standing ;
+        "contactTypeID", ctypeID ]
+      -> (entity ~name ~id, ios standing, ios ctypeID)
+    | [ "contactID", id ; "contactName", name ;
+        "standing", standing ; "contactTypeID", ctypeID ]
+      -> (entity ~name ~id, ios standing, ios ctypeID)
+    | _ -> raise (Response.Wrong "contactListw")
+  in
+  let decode = function
+    | [ char ; corp ; ally ] ->
+        List.map decode_contact char, List.map decode_contact corp, List.map decode_contact ally
+    | _ -> raise (Response.Wrong "contactList'")
+  in
+  {
+    uri = "/char/ContactList.xml.aspx" ;
+    cache = Long ;
+    auth = charkey ;
+    param = no_param ;
+    result = Response.extract_rowsets ;
+    decode ;
+  }
+let get_contactList = apply_api_call Auth tq contactList
+
 (* http://wiki.eve-id.net/APIv2_Char_JournalEntries_XML *)
 let walletJournal =
   let enc_fromID i = [ "fromID", soi i ]

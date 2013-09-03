@@ -8,6 +8,8 @@ let ios = int_of_string
 let soi = string_of_int
 let fos = float_of_string
 let sof = string_of_float
+let bos = bool_of_string
+let sob = string_of_bool
 
 let s2date x : date = x
 
