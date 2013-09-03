@@ -88,9 +88,9 @@ let http_fetch prefix endpoint args =
 
 type cache = Long | Short | MShort
 
-let tq = "https://api.eveonline.com"
+let tq = "api.eveonline.com"
 
-let test = "https://api.testeveonline.com"
+let test = "api.testeveonline.com"
 
 (** Typing madness ! *)
 

@@ -17,17 +17,17 @@ val tq : string
 
 val test : string
 
-type apikey = < keyId : int; vCode : string >
-
+type apikey = Apidsl.apikey
 val apikey : keyId:int -> vCode:string -> apikey
 
-type charkey = < characterID : int; keyId : int; vCode : string >
+type charkey = Apidsl.charkey
 
 val charkey : keyId:int -> vCode:string -> charId:int -> charkey
 
 type enc_param = (string * string) list
 
-type ('extract, 'auth, 'param, 'out) api
+type ('extract, 'auth, 'param, 'out) api =
+  ('extract, 'auth, 'param, 'out) Apidsl.api
 
 val apply_api :
   string -> ('a, 'b, 'c, 'd) api -> 'b -> 'c -> 'd Response.t Lwt.t
@@ -36,7 +36,7 @@ val apply_api :
 
 type date = string
 
-type entity = { name : string ; id : int }
+type entity = Apidsl.entity = {name : string ; id : int }
 
 type walletJournal =
   {
