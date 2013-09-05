@@ -13,6 +13,8 @@ module Eve = Eve
 
 module EveMap = Evemap
 
+module Image = Image
+
 (** {2 Specific modules} *)
 
 module Wallet = Wallet

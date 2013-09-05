@@ -1,7 +1,7 @@
 open Apidsl
 
 let accountStatus =
-  {
+  Api {
     uri = "/account/AccountStatus.xml.aspx" ;
     cache = Short ;
     auth = apikey ;
@@ -12,7 +12,7 @@ let accountStatus =
 let get_accountStatus = apply_api_call Auth tq accountStatus
 
 let apiKeyInfo =
-  {
+  Api {
     uri = "/account/APIKeyInfo.xml.aspx" ;
     cache = Short ;
     auth = apikey ;
@@ -34,7 +34,7 @@ let characters =
         end
     | _ -> raise (Response.Wrong "characters")
   in
-  {
+  Api {
     uri = "/account/Characters.xml.aspx" ;
     cache = Short ;
     auth = apikey ;

@@ -11,7 +11,7 @@ let sof = string_of_float
 let bos = bool_of_string
 let sob = string_of_bool
 
-let s2date x : date = x
+let s2date = Time.parse_date
 
 let entity ~name ~id = { name ; id = ios id }
 

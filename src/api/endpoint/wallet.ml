@@ -1,7 +1,7 @@
 open Apicall
 open Apitype
 
-module M = Map.Make(struct type t = date let compare = compare end)
+module M = Map.Make(CalendarLib.Calendar.Precise)
 
 type t = Apitype.walletJournal M.t
 
@@ -27,6 +27,7 @@ let walk_forward ~uri ~key ?(rowCount=2500) ?(w=M.empty) () =
   let f () = apply_api uri Character.walletJournal key (None, Some rowCount) in
   let rec aux w =
     lwt l = f () in
+    let l = cast l in
     if is_subset l.data w then
       Lwt.return (with_data l w)
     else
@@ -39,6 +40,7 @@ let walk_backward ~uri ~key ?(rowCount=2500) ?fromID ?(w=M.empty) () =
   let f from = apply_api uri Character.walletJournal key (None,from) in
   let rec aux w from =
     lwt l = f from in
+    let l = cast l in
     if l.data = [] then
       Lwt.return (with_data l w)
     else

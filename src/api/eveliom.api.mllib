@@ -1,9 +1,10 @@
 # OASIS_START
-# DO NOT EDIT (digest: cbbb5e5c92937c120d331c8dcc55a502)
+# DO NOT EDIT (digest: badaf07f64ff8d6171243abfd962e458)
 Eve_api
 Apitype
 Apicall
 Apidsl
+Time
 endpoint/Account
 endpoint/Character
 endpoint/Corporation

@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: d68bdb3348a1b7cfe82593035acd36df)
+# DO NOT EDIT (digest: 653c1028b71b7042a9f17043b35014b5)
 package "igb" (
  version = "0.1"
  description = "An Eliom library for Eve Online"
@@ -21,7 +21,7 @@ package "header" (
 package "api" (
  version = "0.1"
  description = "An Eliom library for Eve Online"
- requires = "lwt.syntax eliom.server threads"
+ requires = "calendar lwt.syntax eliom.server threads"
  archive(byte) = "eveliom.api.cma"
  archive(byte, plugin) = "eveliom.api.cma"
  archive(native) = "eveliom.api.cmxa"

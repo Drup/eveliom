@@ -1,10 +1,8 @@
-type date = string
-
 type entity = { name : string ; id : int }
 
 type walletJournal =
   {
-    date : date ;
+    date : Time.t ;
     refID : int ;
     refTypeID : int ;
     owner1 : entity ;

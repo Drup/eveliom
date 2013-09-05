@@ -1,23 +1,38 @@
+open Apitype
+
 module Response = struct
 
   open Simplexmlparser
 
   exception Wrong of string
+  exception ApiError of (int * string)
 
-  type 'a t = {
+  type 'a result = {
     version : string ;
-    currentTime : string ;
-    cachedUntil : string ;
+    cachedUntil : Time.t ;
     data : 'a
   }
 
+  type 'a t =
+    | Result of 'a result
+    | Error of (int * string)
+
   type 'a extract = Simplexmlparser.xml list -> 'a t
 
-  let map f
-      { version ; currentTime ; cachedUntil ; data } =
-    { version ; currentTime ; cachedUntil ; data = f data }
+  let cast = function
+    | Result x -> x
+    | Error a -> raise (ApiError a)
 
-  let with_data r d = map (fun _ -> d) r
+  let mapr f { version ; cachedUntil ; data } =
+      { version ; cachedUntil ; data = f data }
+
+  let map_t f = function
+    | Result a -> Result (f a)
+    | Error _ as x -> x
+
+  let map f = map_t (mapr f)
+
+  let with_data r d = mapr (fun _ -> d) r
 
   let parse_row = function
     | Element ("row", l , []) -> l
@@ -41,11 +56,13 @@ module Response = struct
 
   let extract = function
     | [Element ("eveapi", [("version", version)],
-         [ Element ("currentTime", [], [PCData currentTime]) ;
+         [ Element ("currentTime", [], [PCData t1 ]) ;
            Element ("result", [], data) ;
-           Element ("cachedUntil", [], [PCData cachedUntil])
+           Element ("cachedUntil", [], [PCData t2 ])
          ])]
-      -> { version ; currentTime ; cachedUntil ; data }
+      -> Result { version ; cachedUntil = Time.extract_next_date t1 t2 ; data }
+    | [Element ("eveapi", _ , [ _  ; Element ("error", ["code", code], [PCData descr]) ; _ ])]
+      -> Error (int_of_string code, descr)
     | _ -> raise (Wrong "extract")
 
   let extract_tags r = map parse_tags (extract r)
@@ -70,14 +87,15 @@ module OS = Ocsigen_stream
 
 (** Fetching stuff *)
 
-let http_fetch prefix endpoint args =
+let http_fetch ?(https=false) prefix endpoint args =
   let open Ocsigen_http_client in
-  lwt response = post_urlencoded ~host:prefix ~uri:endpoint ~content:args () in
+  lwt response =
+    post_urlencoded ~https ~host:prefix ~uri:endpoint ~content:args () in
   let stream = response.Ocsigen_http_frame.frame_content in
   lwt data = match stream with
     | None -> Lwt.return ""
     | Some s ->
-        let body = OS.string_of_stream Sys.max_string_length (OS.get s) in
+        let body = OS.string_of_stream 100000000 (OS.get s) in
         lwt () = Ocsigen_stream.finalize s `Success in
         body
   in
@@ -109,9 +127,12 @@ let charkey ~keyId ~vCode ~charId : charkey =
     method characterID = charId
   end
 
+let add_char ~(key:apikey) ~charId =
+  charkey key#keyId key#vCode charId
+
 type enc_param = (string * string) list
 
-type ('extract, 'auth , 'param, 'out) api = {
+type ('extract, 'auth , 'param, 'out) internal_api = {
   cache : cache ;
   result : 'extract Response.extract ;
   auth : 'auth -> enc_param ;
@@ -120,12 +141,26 @@ type ('extract, 'auth , 'param, 'out) api = {
   uri : string ;
 }
 
-let apply_api prefix endpoint =
+type (_,_,_) api =
+  Api : (_ , 'auth , 'param, 'out) internal_api -> ('auth , 'param, 'out) api
+
+let apply_api ?(https=false) prefix (Api endpoint) =
   let cont args =
-    lwt response = http_fetch prefix endpoint.uri args in
+    lwt response = http_fetch ~https prefix endpoint.uri args in
     let data = Response.map endpoint.decode (endpoint.result response) in
     Lwt.return data
   in
   let f auth param =
     cont (endpoint.auth auth @ endpoint.param param)
   in f
+
+let rec periodic_update call update =
+  lwt r = call () in
+  let x = update r in
+  match_lwt x with
+    | `Ok -> begin
+        let t = Time.get_second_until r.Response.cachedUntil in
+        lwt () = Lwt_unix.sleep (float t) in
+        periodic_update call update
+      end
+    | _ -> x

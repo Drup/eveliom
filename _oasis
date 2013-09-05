@@ -27,12 +27,12 @@ Library "eveliom.api"
   Path:			src/api
   BuildTools:		ocamlbuild
   InternalModules:
-    Apitype, Apicall, Apidsl,
+    Apitype, Apicall, Apidsl, Time,
     endpoint/Account, endpoint/Character, endpoint/Corporation, endpoint/Evemap, endpoint/Eve,
     endpoint/Wallet
 
   Modules:		Eve_api
-  BuildDepends:		lwt.syntax, eliom.server, threads
+  BuildDepends:		calendar, lwt.syntax, eliom.server, threads
 
 Document doc
   Install:		false

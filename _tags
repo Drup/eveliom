@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: cb70bd909e40ffb36d5ed5abc64c8cd9)
+# DO NOT EDIT (digest: 3f54b93fdb448d09632b2eacc2ab6460)
 # Ignore VCS directories, you can use the same kind of rule outside 
 # OASIS_START/STOP if you want to exclude directories that contains 
 # useless stuff for the build process
@@ -24,9 +24,11 @@
 <src/igb/*.ml{,i}>: pkg_js_of_ocaml
 # Library eveliom.api
 "src/api/eveliom.api.cmxs": use_eveliom.api
+<src/api/*.ml{,i}>: pkg_calendar
 <src/api/*.ml{,i}>: pkg_lwt.syntax
 <src/api/*.ml{,i}>: pkg_eliom.server
 <src/api/*.ml{,i}>: pkg_threads
+<src/api/endpoint/*.ml{,i}>: pkg_calendar
 <src/api/endpoint/*.ml{,i}>: pkg_lwt.syntax
 <src/api/endpoint/*.ml{,i}>: pkg_eliom.server
 <src/api/endpoint/*.ml{,i}>: pkg_threads

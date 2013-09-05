@@ -2,7 +2,7 @@ open Apidsl
 
 let characterInfo =
   let enc cID = [ ("characterID", cID) ] in
-  {
+  Api {
     uri = "/eve/CharacterInfo.xml.aspx" ;
     cache = Short ;
     auth = no_param ;
