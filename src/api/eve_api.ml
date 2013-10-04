@@ -1,3 +1,5 @@
+module Time = Apitime
+
 include Apitype
 include Apicall
 

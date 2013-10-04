@@ -1,7 +1,7 @@
 open Apicall
 open Apitype
 
-module M = Map.Make(CalendarLib.Calendar.Precise)
+module M = Map.Make(Apitime)
 
 type t = Apitype.walletJournal M.t
 

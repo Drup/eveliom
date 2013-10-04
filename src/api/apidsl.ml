@@ -11,7 +11,7 @@ let sof = string_of_float
 let bos = bool_of_string
 let sob = string_of_bool
 
-let s2date = Time.parse_date
+let s2date = Apitime.parse_date
 
 let entity ~name ~id = { name ; id = ios id }
 
@@ -31,6 +31,8 @@ let no_param () = []
 let no_decode id = id
 let ( ** ) f g (x,y) = f x @ g y
 let (!?) f = function Some x -> f x | None -> []
+
+external id : 'a -> 'a = "%identity"
 
 type ('t1, 't2) call_conv =
   | Nothing    : (unit -> unit -> 'a , unit -> 'a) call_conv

@@ -9,7 +9,7 @@ module Response = struct
 
   type 'a result = {
     version : string ;
-    cachedUntil : Time.t ;
+    cachedUntil : Apitime.t ;
     data : 'a
   }
 
@@ -38,19 +38,23 @@ module Response = struct
     | Element ("row", l , []) -> l
     | _ -> raise (Wrong "row")
 
-  let parse_rowset = function
-    | Element ("rowset", [("name", name); ("key", key); ("columns", col)], rows)
-      -> List.map parse_row rows
-    | _ -> raise (Wrong "rowset")
+  let parse_row' f = function
+    | Element ("row", l , m) -> l, f m
+    | _ -> raise (Wrong "row")
 
-  let parse_rowset2 = function
+  let parse_rowset f = function
     | Element ("rowset", [("name", name); ("key", key); ("columns", col)], rows)
-      -> List.map parse_rowset rows
+      -> List.map f rows
     | _ -> raise (Wrong "rowset")
 
   let parse_tag = function
     | Element (k, [], [PCData v]) -> (k, v)
     | _ -> raise (Wrong "tag")
+
+    let (@>) f g  = function
+      | [ l ] -> f g l
+      | _ -> raise (Wrong "rowset")
+    and (@>>) f g l = List.map (f g) l
 
   let parse_tags = List.map parse_tag
 
@@ -60,26 +64,29 @@ module Response = struct
            Element ("result", [], data) ;
            Element ("cachedUntil", [], [PCData t2 ])
          ])]
-      -> Result { version ; cachedUntil = Time.extract_next_date t1 t2 ; data }
-    | [Element ("eveapi", _ , [ _  ; Element ("error", ["code", code], [PCData descr]) ; _ ])]
-      -> Error (int_of_string code, descr)
+      -> Result { version ; cachedUntil = Apitime.extract_next_date t1 t2 ; data }
+    | [Element ("eveapi", _ , l)] ->
+        let bla = function Element ("error",_,_) -> true | _ -> false in
+        let f = function
+          | Element ("error", ["code", code], [PCData descr]) ->
+              Error (int_of_string code, descr)
+          | _ -> raise (Wrong "error detection")
+        in List.find bla l |> f
+    | [PCData "Bad Request"] -> raise (Wrong "Bad request")
+    | [] -> raise (Wrong "empty answer")
     | _ -> raise (Wrong "extract")
 
-  let extract_tags r = map parse_tags (extract r)
+  let extract_tags r =
+    map parse_tags (extract r)
 
-  let extract_rowset r  =
-    let f = function
-      | [ l ] -> parse_rowset l
-      | _ -> raise (Wrong "rowset")
-    in map f (extract r)
+  let extract_rowset r =
+    map (parse_rowset @> parse_row) (extract r)
 
-  let extract_rowsets r = map (List.map parse_rowset) (extract r)
+  let extract_rowsets r =
+    map (parse_rowset @>> parse_row) (extract r)
 
-  let extract_rowset2 r  =
-    let f = function
-      | [ l ] -> parse_rowset2 l
-      | _ -> raise (Wrong "rowset2")
-    in map f (extract r)
+  let extract_rowset2 r =
+    map (parse_rowset @>> parse_rowset @@ parse_row) (extract r)
 
 end
 
@@ -89,13 +96,15 @@ module OS = Ocsigen_stream
 
 let http_fetch ?(https=false) prefix endpoint args =
   let open Ocsigen_http_client in
-  lwt response =
-    post_urlencoded ~https ~host:prefix ~uri:endpoint ~content:args () in
+  lwt response = match args with
+    | [] -> get ~https ~host:prefix ~uri:endpoint ()
+    | _ ->  post_urlencoded ~https ~host:prefix ~uri:endpoint ~content:args ()
+  in
   let stream = response.Ocsigen_http_frame.frame_content in
   lwt data = match stream with
     | None -> Lwt.return ""
     | Some s ->
-        let body = OS.string_of_stream 100000000 (OS.get s) in
+        let body = OS.string_of_stream (int_of_float (2. ** 30.)) (OS.get s) in
         lwt () = Ocsigen_stream.finalize s `Success in
         body
   in
@@ -154,13 +163,42 @@ let apply_api ?(https=false) prefix (Api endpoint) =
     cont (endpoint.auth auth @ endpoint.param param)
   in f
 
-let rec periodic_update call update =
+let rec periodic_update ?delay ~call ~error ~update () =
+  let open Response in
+  let get_delay r =
+    Ocsigen_lib.Option.get
+      (fun () -> Apitime.time_until r.cachedUntil)
+      delay
+  in
   lwt r = call () in
-  let x = update r in
-  match_lwt x with
-    | `Ok -> begin
-        let t = Time.get_second_until r.Response.cachedUntil in
+  lwt next_wait = match r with
+    | Result t ->
+        lwt next = update t in
+        let d = match next with `KeepGoing -> `Delay (get_delay t) | x -> x in
+        Lwt.return d
+    | Error s ->
+        lwt next = error s in
+        let d = match next, delay with `KeepGoing, Some d -> `Delay d | x,_ -> x in
+        Lwt.return d
+  in
+  match next_wait with
+    | `Delay d ->
+        let t = Apitime.to_seconds d in
         lwt () = Lwt_unix.sleep (float t) in
-        periodic_update call update
-      end
-    | _ -> x
+        periodic_update ?delay ~call ~error ~update ()
+    | `Retry ->
+        lwt () = Lwt_unix.yield () in
+        periodic_update ?delay ~call ~error ~update ()
+    | _ as x -> Lwt.return x
+
+let handle_error ?log (x,s) =
+  Ocsigen_lib.Option.iter ((|>) s) log ;
+  match x with
+    | i when i < 200 -> `Stop
+    | i when i < 300 -> `Stop
+    | 521 -> `Stop
+    | i when i < 600 -> `Delay (Apitime.Period.lmake ~minute:30 ())
+    | 901 | 902 | 999 | 1001 -> `Delay (Apitime.Period.lmake ~hour:1 ())
+    | 903 -> `Delay (Apitime.Period.lmake ~hour:1 ())
+    | 904 -> `Delay (Apitime.Period.lmake ~day:1 ())
+    | _ -> `Stop
