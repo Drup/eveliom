@@ -3,6 +3,10 @@ module Time = Apitime
 include Apitype
 include Apicall
 
+include Cache
+
+module Response = Response
+
 (** {2 APIs} *)
 
 module Account = Account

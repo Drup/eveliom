@@ -8,6 +8,8 @@ B _build/src/api/endpoint
 B _build/src/header
 B _build/src/igb
 
+PKG lwt
+EXT lwt
 PKG eliom.server
 PKG js_of_ocaml
 PKG tyxml

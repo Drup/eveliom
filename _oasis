@@ -27,7 +27,7 @@ Library "eveliom.api"
   Path:			src/api
   BuildTools:		ocamlbuild
   InternalModules:
-    Apitime, Apitype, Apicall, Apidsl,
+    Apitime, Apitype, Apicall, Apidsl, Cache, Response,
     endpoint/Account, endpoint/Character, endpoint/Corporation, endpoint/Evemap, endpoint/Eve,
     endpoint/Wallet, endpoint/Image
 

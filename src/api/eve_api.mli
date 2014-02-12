@@ -13,12 +13,12 @@ module Response :
 sig
   exception Wrong of string
   exception ApiError of (int * string)
-  type 'a result = 'a Apidsl.Response.result = {
+  type 'a result = 'a Response.result = {
     version : string ;
     cachedUntil : Time.t ;
     data : 'a ;
   }
-  type 'a t = 'a Apidsl.Response.t =
+  type 'a t = 'a Response.t =
     | Result of 'a result
     | Error of (int * string)
 
@@ -48,6 +48,7 @@ val apply_api :
   'auth -> 'param -> 'out Response.t Lwt.t
 
 val periodic_update :
+  ?log:('e Time.apiperiod -> unit) ->
   ?delay:'d Time.apiperiod ->
   call:(unit -> 'c Response.t Lwt.t) ->
   error:(int * string ->
