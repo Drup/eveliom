@@ -6,21 +6,28 @@ let get_size = function
 let tq = "http://image.eveonline.com"
 let test = "http://image.testeveonline.com"
 
-let get api ty x size =
-  let s = Printf.sprintf "%s%s%i_%s.png" api ty x (get_size size)
+type format = PNG | JPG
+let format_to_string = function
+  | PNG -> ".png"
+  | JPG -> ".jpg"
+
+let get api ty x size format =
+  let s =
+    Printf.sprintf "%s%s%i_%s%s"
+      api ty x (get_size size) (format_to_string format)
   in Eliom_content.Html5.F.uri_of_string (fun () -> s)
 
 let ally ?(api=tq) (size : [< `T32 | `T64 | `T128 ]) x =
-  get api "/Alliance/" x size
+  get api "/Alliance/" x size PNG
 
 let corp ?(api=tq) (size : [< `T32 | `T64 | `T128 | `T256]) x =
-  get api "/Corporation/" x size
+  get api "/Corporation/" x size PNG
 
 let char ?(api=tq) (size : [< `T32 | `T64 | `T128 | `T256 | `T512]) x =
-  get api "/Character/" x size
+  get api "/Character/" x size JPG
 
 let typ ?(api=tq) (size : [< `T32 | `T64 ]) x =
-  get api "/Type/" x size
+  get api "/Type/" x size PNG
 
 let render ?(api=tq) (size : [< `T32 | `T64 | `T128 | `T256 | `T512]) x =
-  get api "/Render/" x size
+  get api "/Render/" x size PNG
