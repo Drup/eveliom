@@ -11,12 +11,10 @@ AlphaFeatures: compiled_setup_ml
 BuildTools: ocamlbuild
 
 Library "eveliom.header"
-  Install:		true
-  Path:			src/header
-  BuildTools:		ocamlbuild
-  InternalModules:	Clist
-  Modules:		Eve_header
-  BuildDepends:		lwt.syntax, eliom.server, threads
+  Install: true
+  Path: src/header
+  Modules: Eve_headers, Eveliom_headers
+  BuildDepends: eliom.server, threads
 
 Library "eveliom.igb"
   Install:		true
