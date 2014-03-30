@@ -12,6 +12,7 @@
 setup.data
 setup.log
 doc.docdir
+setup.exe
 
 # ocamlbuild
 _build

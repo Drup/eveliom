@@ -1,10 +1,14 @@
-OASISFormat: 0.3
+OASISFormat: 0.4
 Name:        Eveliom
 Version:     0.1
 Synopsis:    An Eliom library for Eve Online
 Authors:     Gabriel Radanne
 License:     WTFPL
 Plugins:     DevFiles (0.3), META (0.3)
+
+
+AlphaFeatures: compiled_setup_ml
+BuildTools: ocamlbuild
 
 Library "eveliom.header"
   Install:		true
@@ -17,7 +21,6 @@ Library "eveliom.header"
 Library "eveliom.igb"
   Install:		true
   Path:			src/igb
-  BuildTools:		ocamlbuild
   Modules:		Eve_igb
   CompiledObject: 	byte
   BuildDepends:		lwt.syntax, js_of_ocaml
@@ -25,7 +28,6 @@ Library "eveliom.igb"
 Library "eveliom.api"
   Install:		true
   Path:			src/api
-  BuildTools:		ocamlbuild
   InternalModules:
     Apitime, Apitype, Apicall, Apidsl, Cache, Response,
     endpoint/Account, endpoint/Character, endpoint/Corporation, endpoint/Evemap, endpoint/Eve,
