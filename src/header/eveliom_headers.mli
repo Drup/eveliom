@@ -5,28 +5,28 @@
 *)
 
 type t = {
-    trusted : bool;
-    serverip : string;
-    charname : string;
-    charid : int;
-    corpname : string;
-    corpid : int;
-    alliancename : string option;
-    allianceid : int option;
-    regionname : string;
-    regionid : int;
-    constellationname : string;
-    solarsystemname : string;
-    stationname : string option;
-    stationid : int option;
-    corprole : string option;
-    solarsystemid : int;
-    warfactionid : int option;
-    shipid : int;
-    shipname : string;
-    shiptypeid : int;
-    shiptypename : string;
-  }
+  trusted : bool;
+  serverip : string;
+  charname : string;
+  charid : int;
+  corpname : string;
+  corpid : int;
+  alliancename : string option;
+  allianceid : int option;
+  regionname : string;
+  regionid : int;
+  constellationname : string;
+  solarsystemname : string;
+  stationname : string option;
+  stationid : int option;
+  corprole : string option;
+  solarsystemid : int;
+  warfactionid : int option;
+  shipid : int;
+  shipname : string;
+  shiptypeid : int;
+  shiptypename : string;
+}
 
 type state = NotIGB | IGB | Trusted of t
 

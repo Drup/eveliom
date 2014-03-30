@@ -1,8 +1,8 @@
 
 module Time : sig
   include module type of CalendarLib.Calendar
-     with type t = Apitime.t
-      and type t = CalendarLib.Calendar.t
+  with type t = Apitime.t
+   and type t = CalendarLib.Calendar.t
   type 'a apiperiod =
     ([< CalendarLib.Period.date_field > `Day `Week ] as 'a) Period.period
 end
@@ -52,19 +52,19 @@ val periodic_update :
   ?delay:'d Time.apiperiod ->
   call:(unit -> 'c Response.t Lwt.t) ->
   error:(int * string ->
-   ([> `Delay of 'd Time.apiperiod
-    | `KeepGoing
-    | `Retry ]
-    as 'a) Lwt.t) ->
+    ([> `Delay of 'd Time.apiperiod
+     | `KeepGoing
+     | `Retry ]
+     as 'a) Lwt.t) ->
   update:('c Response.result -> 'a Lwt.t) ->
   unit -> 'a Lwt.t
 (**
    [ periodic_update call error update ] will execute [ call ] and apply [ update ] to the result or call [error] with the error code and message.
 
    If [update] or [error] returns [ `KeepGoing ], [`Retry] or [`Delay d], then [ periodic_update call update ] will be called again. The delay before recal depends on the argument :
-- If [`Retry] is returned, the recall is imediate
-- If [`Delay d] is returned, the recall will occur in [d].
-- [ update ] can return [ `KeepGoing], in this case, the recall will occur according to the [ cachedUntil ] field. [ error ] can return [`KeepGoing] only if ~delay is provided, if it's not, the recall will stop.
+   - If [`Retry] is returned, the recall is imediate
+   - If [`Delay d] is returned, the recall will occur in [d].
+   - [ update ] can return [ `KeepGoing], in this case, the recall will occur according to the [ cachedUntil ] field. [ error ] can return [`KeepGoing] only if ~delay is provided, if it's not, the recall will stop.
 
    If [update] or [error] returns anything else, the thread returns imediatly with this result.
 

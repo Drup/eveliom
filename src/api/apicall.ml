@@ -62,8 +62,8 @@ type ('extract, 'auth , 'param, 'out) internal_api = {
 }
 
 type (_,_,_) api =
-  Api : (_ , 'auth , 'param, 'out) internal_api ->
-  ('auth , 'param, 'out) api
+    Api : (_ , 'auth , 'param, 'out) internal_api ->
+    ('auth , 'param, 'out) api
 
 let apply_api ?(https=false) prefix (Api endpoint) =
   let cont args =

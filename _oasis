@@ -17,28 +17,27 @@ Library "eveliom.header"
   BuildDepends: eliom.server, threads
 
 Library "eveliom.igb"
-  Install:		true
-  Path:			src/igb
-  Modules:		Eve_igb
-  CompiledObject: 	byte
-  BuildDepends:		lwt.syntax, js_of_ocaml
+  Install: true
+  Path: src/igb
+  Modules: Eve_igb
+  CompiledObject: byte
+  BuildDepends: lwt.syntax, js_of_ocaml
 
 Library "eveliom.api"
-  Install:		true
-  Path:			src/api
+  Install: true
+  Path: src/api
   InternalModules:
     Apitime, Apitype, Apicall, Apidsl, Cache, Response,
     endpoint/Account, endpoint/Character, endpoint/Corporation, endpoint/Evemap, endpoint/Eve,
     endpoint/Wallet, endpoint/Image
-
-  Modules:		Eve_api
-  BuildDepends:		calendar, lwt.syntax, eliom.server, threads
+  Modules: Eve_api
+  BuildDepends: calendar, lwt.syntax, eliom.server, threads
 
 Document doc
-  Install:		false
-  InstallDir:		$htmldir/doc
-  Title:		API reference for Eveliom
-  Type:			ocamlbuild (0.3)
-  BuildTools:		ocamldoc, ocamlbuild
-  XOCamlbuildPath:	src
-  XOCamlbuildLibraries:	eveliom.igb, eveliom.header, eveliom.api
+  Install: false
+  InstallDir: $htmldir/doc
+  Title: API reference for Eveliom
+  Type: ocamlbuild (0.3)
+  BuildTools: ocamldoc, ocamlbuild
+  XOCamlbuildPath: src
+  XOCamlbuildLibraries: eveliom.igb, eveliom.header, eveliom.api

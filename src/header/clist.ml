@@ -24,10 +24,10 @@ let rec append : type x i o . (_,x,i) t -> (_,o,x) t -> (_,o,i) t =
 
 let glue mono const l =
   let rec aux : type enc out a .
-        enc mono -> (enc -> out) -> enc -> (enc,out,a) t -> a =
+    enc mono -> (enc -> out) -> enc -> (enc,out,a) t -> a =
     fun mono const acc -> function
-    | Cons (NoParam,l) -> aux mono const acc l
-    | Cons (Param f,l) -> (fun arg -> aux mono const (mono.plus (f arg) acc) l)
-    | Nil -> const acc
+      | Cons (NoParam,l) -> aux mono const acc l
+      | Cons (Param f,l) -> (fun arg -> aux mono const (mono.plus (f arg) acc) l)
+      | Nil -> const acc
   in
   aux mono const mono.empty l
