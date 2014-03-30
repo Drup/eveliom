@@ -11,7 +11,7 @@ let fetch_headers () =
 
 
 (* We are going to use an eref to make the igb easier to access
-   This eref will have the Request scope to be updated correctly for ch request and will contain the current state of the igb
+   This eref will have the Request scope to be updated correctly for each request and will contain the current state of the igb
 *)
 
 let init_igb_headers () =
