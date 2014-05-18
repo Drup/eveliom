@@ -10,20 +10,27 @@ Plugins:     DevFiles (0.3), META (0.3)
 AlphaFeatures: compiled_setup_ml
 BuildTools: ocamlbuild
 
-Library "eveliom.header"
+Library eveliom
+  Install: true
+  Path: src
+
+Library header
+  FindLibParent: eveliom
   Install: true
   Path: src/header
   Modules: Eve_headers, Eveliom_headers
   BuildDepends: eliom.server, threads
 
-Library "eveliom.igb"
+Library igb
+  FindLibParent: eveliom
   Install: true
   Path: src/igb
   Modules: Eve_igb
   CompiledObject: byte
   BuildDepends: lwt.syntax, js_of_ocaml
 
-Library "eveliom.api"
+Library api
+  FindLibParent: eveliom
   Install: true
   Path: src/api
   InternalModules:
