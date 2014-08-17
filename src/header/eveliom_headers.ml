@@ -7,7 +7,7 @@ let fetch_headers () =
   let open Ocsigen_http_frame in
   let open Http_header in
   let ri = Eliom_request_info.get_ri () in
-  get_headers ri.Ocsigen_extensions.ri_http_frame.frame_header
+  get_headers (Ocsigen_extensions.Ocsigen_request_info.http_frame ri).frame_header
 
 
 (* We are going to use an eref to make the igb easier to access
