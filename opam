@@ -1,0 +1,23 @@
+opam-version: "1"
+maintainer: "drupyog@zoho.com"
+authors: [ "Gabriel Radanne" ]
+license: "WTFPL"
+build: [
+  ["./configure" "--prefix" prefix]
+  [make]
+  [make "install"]
+]
+remove: [
+  ["ocamlfind" "remove" "eveliom"]
+]
+build-doc: [ "make" "-doc" ]
+depends: [
+  "base-threads"
+  "calendar"
+  "eliom"
+  "js_of_ocaml"
+  "lwt"
+  "ocamlfind"
+  # Not for releases
+  "oasis"
+]
