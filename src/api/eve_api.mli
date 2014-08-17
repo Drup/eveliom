@@ -1,12 +1,4 @@
 
-module Time : sig
-  include module type of CalendarLib.Calendar
-  with type t = Apitime.t
-   and type t = CalendarLib.Calendar.t
-  type 'a apiperiod =
-    ([< CalendarLib.Period.date_field > `Day `Week ] as 'a) Period.period
-end
-
 (** Api spectification and access. *)
 
 module Response :
@@ -15,7 +7,7 @@ sig
   exception ApiError of (int * string)
   type 'a result = 'a Response.result = {
     version : string ;
-    cachedUntil : Time.t ;
+    cachedUntil : CalendarLib.Calendar.t ;
     data : 'a ;
   }
   type 'a t = 'a Response.t =
@@ -48,11 +40,11 @@ val apply_api :
   'auth -> 'param -> 'out Response.t Lwt.t
 
 val periodic_update :
-  ?log:('e Time.apiperiod -> unit) ->
-  ?delay:'d Time.apiperiod ->
+  ?log:([< CalendarLib.Period.date_field > `Day `Week ] CalendarLib.Calendar.Period.period -> unit) ->
+  ?delay:([< CalendarLib.Period.date_field > `Day `Week ] CalendarLib.Calendar.Period.period as 'd)->
   call:(unit -> 'c Response.t Lwt.t) ->
   error:(int * string ->
-    ([> `Delay of 'd Time.apiperiod
+    ([> `Delay of 'd
      | `KeepGoing
      | `Retry ]
      as 'a) Lwt.t) ->
@@ -62,20 +54,21 @@ val periodic_update :
    [ periodic_update call error update ] will execute [ call ] and apply [ update ] to the result or call [error] with the error code and message.
 
    If [update] or [error] returns [ `KeepGoing ], [`Retry] or [`Delay d], then [ periodic_update call update ] will be called again. The delay before recal depends on the argument :
-   - If [`Retry] is returned, the recall is imediate
+   - If [`Retry] is returned, the recall is immediate
    - If [`Delay d] is returned, the recall will occur in [d].
    - [ update ] can return [ `KeepGoing], in this case, the recall will occur according to the [ cachedUntil ] field. [ error ] can return [`KeepGoing] only if ~delay is provided, if it's not, the recall will stop.
 
-   If [update] or [error] returns anything else, the thread returns imediatly with this result.
+   If [update] or [error] returns anything else, the thread returns immediately with this result.
 
    the [call], [error]  and [update] functions should raise exceptions in the Lwt way.
-   The optionnal argument [delay] allow to overwrite the normal delay the [ cacheUntil ] field evertime it's used..
+   The optionnal argument [delay] allows to overwrite the normal delay provided by the [ cacheUntil ] field.
    The thread returned can be canceled.
 *)
 
 val handle_error :
   ?log:(string -> unit) -> int * string ->
-  [> `Delay of Time.Period.t | `Stop | `Retry ]
+  [> `Delay of CalendarLib.Calendar.Period.t
+  | `Stop | `Retry ]
 
 
 (** {2 APIs} *)
@@ -84,7 +77,7 @@ type entity = Apidsl.entity = {name : string ; id : int }
 
 type walletJournal =
   {
-    date : Time.t ;
+    date : CalendarLib.Calendar.t ;
     refID : int ;
     refTypeID : int ;
     owner1 : entity ;
@@ -124,7 +117,7 @@ module Image : sig
       The 3rd argument is the entity id.
   *)
 
-  open Eliom_content_core.Xml
+  open Eliom_content.Xml
   val ally :   ?api:string -> [< `T32 | `T64 | `T128 ]                 -> int -> uri
   val corp :   ?api:string -> [< `T32 | `T64 | `T128 | `T256 ]         -> int -> uri
   val char :   ?api:string -> [< `T32 | `T64 | `T128 | `T256 | `T512 ] -> int -> uri
