@@ -29,7 +29,7 @@ let calendarEventAttendees =
     uri = "/char/CalendarEventAttendees.xml.aspx" ;
     cache = MShort ;
     auth = charkey ;
-    param = (fun x -> [ "eventIDs", soi x ]) ;
+    param = (fun x -> [ "eventIDs", [soi x] ]) ;
     result = Response.extract_rowset ;
     decode = fun i -> i ;
   }
@@ -53,10 +53,10 @@ let contactList =
     | [ "contactID", id ; "contactName", name ;
         "inWatchList", watched; "standing", standing ;
         "contactTypeID", ctypeID ]
-      -> (entity ~name ~id, ios standing, ios ctypeID)
+      -> (entity ~name ~id, fos standing, ios ctypeID)
     | [ "contactID", id ; "contactName", name ;
         "standing", standing ; "contactTypeID", ctypeID ]
-      -> (entity ~name ~id, ios standing, ios ctypeID)
+      -> (entity ~name ~id, fos standing, ios ctypeID)
     | _ -> raise (Response.Wrong "contactListw")
   in
   let decode = function
@@ -76,8 +76,8 @@ let get_contactList = apply_api_call Auth tq contactList
 
 (* http://wiki.eve-id.net/APIv2_Char_JournalEntries_XML *)
 let walletJournal =
-  let enc_fromID i = [ "fromID", soi i ]
-  and enc_rowCount i = [ "rowCount", soi i ]
+  let enc_fromID i = [ "fromID", [soi i] ]
+  and enc_rowCount i = [ "rowCount", [soi i] ]
   in
   let decode_line = function
     | [ "date",date ; "refID",refID ; "refTypeID",refTypeID ;
@@ -116,8 +116,8 @@ let get_walletJournal ?fromID ?rowCount ~key =
 
 (* http://wiki.eve-id.net/APIv2_Char_MarketTransactions_XML *)
 let walletTransactions =
-  let enc_fromID i = [ "fromID", soi i ]
-  and enc_rowCount i = [ "rowCount", soi i ]
+  let enc_fromID i = [ "fromID", [soi i] ]
+  and enc_rowCount i = [ "rowCount", [soi i] ]
   in
   Api {
     uri = "/char/WalletTransactions.xml.aspx" ;

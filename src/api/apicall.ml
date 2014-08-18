@@ -5,20 +5,13 @@ module OS = Ocsigen_stream
 
 (** Fetching stuff *)
 
-let http_fetch ?(https=false) prefix endpoint args =
-  let open Ocsigen_http_client in
-  lwt response = match args with
-    | [] -> get ~https ~host:prefix ~uri:endpoint ()
-    | _ ->  post_urlencoded ~https ~host:prefix ~uri:endpoint ~content:args ()
+let http_fetch ?(log=ignore) ?(https=false) prefix endpoint args =
+  let scheme = if https then "https" else "http" in
+  let target = Uri.make ~scheme ~host:prefix ~path:endpoint ~query:args () in
+  log ("Request to " ^ Uri.to_string target) ;
+  lwt response = Cohttp_lwt_unix.Client.get target
   in
-  let stream = response.Ocsigen_http_frame.frame_content in
-  lwt data = match stream with
-    | None -> Lwt.return ""
-    | Some s ->
-        let body = OS.string_of_stream (int_of_float (2. ** 30.)) (OS.get s) in
-        lwt () = Ocsigen_stream.finalize s `Success in
-        body
-  in
+  lwt data = Cohttp_lwt_body.to_string (snd response) in
   let xmldata = Simplexmlparser.xmlparser_string data in
   Lwt.return xmldata
 
@@ -50,7 +43,7 @@ let charkey ~keyId ~vCode ~charId : charkey =
 let add_char ~(key:apikey) ~charId =
   charkey key#keyId key#vCode charId
 
-type enc_param = (string * string) list
+type enc_param = (string * string list) list
 
 type ('extract, 'auth , 'param, 'out) internal_api = {
   cache : cache ;
@@ -65,9 +58,9 @@ type (_,_,_) api =
     Api : (_ , 'auth , 'param, 'out) internal_api ->
     ('auth , 'param, 'out) api
 
-let apply_api ?(https=false) prefix (Api endpoint) =
+let apply_api ?log ?(https=false) prefix (Api endpoint) =
   let cont args =
-    lwt response = http_fetch ~https prefix endpoint.uri args in
+    lwt response = http_fetch ?log ~https prefix endpoint.uri args in
     let data = Response.map endpoint.decode (endpoint.result response) in
     Lwt.return data
   in

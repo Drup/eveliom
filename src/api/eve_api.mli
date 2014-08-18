@@ -36,6 +36,7 @@ val add_char : key:apikey -> charId:int -> charkey
 type ('auth, 'param, 'out) api = ('auth, 'param, 'out) Apidsl.api
 
 val apply_api :
+  ?log:(string -> unit) ->
   ?https:bool -> string -> ('auth, 'param, 'out) api ->
   'auth -> 'param -> 'out Response.t Lwt.t
 

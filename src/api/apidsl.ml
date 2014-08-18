@@ -21,11 +21,11 @@ let soptf = function "" -> 0. | s -> fos s
 
 (** DSL stuff *)
 
-let apikey (k : apikey) =
-  [ ("keyID", string_of_int (k#keyId)) ; ("vCode", k#vCode) ]
+let apikey (k : apikey) : enc_param =
+  [ ("keyID", [string_of_int (k#keyId)]) ; ("vCode", [k#vCode]) ]
 
-let charkey (k : charkey) =
-  ("characterID", string_of_int (k#characterID)) :: apikey (k :> apikey)
+let charkey (k : charkey) : enc_param =
+  ("characterID", [string_of_int (k#characterID)]) :: apikey (k :> apikey)
 
 let no_param () = []
 let no_decode id = id
